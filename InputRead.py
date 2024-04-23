@@ -16,7 +16,7 @@ def parse_input_file(filename):
         elif line.startswith('Start location:'):
             startLocation = line.split(':')[1].strip()
         elif line.startswith('Delivery locations:'):
-            deliveryLocations = [loc.strip() for loc in line.split(':')[1].split(',')]
+            deliveryLocations = [loc.strip() for loc in line.split(':')[1].split()]
 
     return algorithm, startLocation, deliveryLocations
 
