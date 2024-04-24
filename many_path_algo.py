@@ -1,20 +1,43 @@
 #######################################################
-#### MazeGame uses a grid of rows X cols to demonstrate
-#### pathfinding using A*.
-####
+#### Final Project
+#### Joe Popp, Trevor, Deston
 #### AI, Spring 2024
 #######################################################
 import tkinter as tk
 from PIL import ImageTk, Image, ImageOps 
 from queue import PriorityQueue
+import argparse
+import re
+
 
 
 ######################################################
-
-#### A cell stores f(), g() and h() values
-#### A cell is either open or part of a wall
+#### Read file
 ######################################################
+def parse_input_file(filename):
+    with open(filename, 'r') as file:
+        data = file.readlines()
+    
+    algorithm = None
+    startLocation = None
+    deliveryLocations = []
 
+    for line in data:
+        line = line.strip()
+        if line.startswith('Delivery algorithm:'):
+            algorithm = line.split(':')[1].strip()
+        elif line.startswith('Start location:'):
+            startLocation = line.split(':')[1].strip()
+        elif line.startswith('Delivery locations:'):
+            deliveryLocations = [loc.strip() for loc in line.split(':')[1].split()]
+
+    return algorithm, startLocation, deliveryLocations
+
+
+
+######################################################
+#### Cell class
+######################################################
 class Cell:
     #### Initially, arre maze cells have g() = inf and h() = 0
     def __init__(self, x, y, is_wall=False):
@@ -31,29 +54,33 @@ class Cell:
         return self.f < other.f
 
 
+
 ######################################################
-# A maze is a grid of size rows X cols
+#### Maze class
 ######################################################
 class MazeGame:
-    def __init__(self, root, maze, startLocation, deliveryLocation):
+    def __init__(self, root, maze, algorithm, startLocation, deliveryLocations):
         self.root = root
         self.maze = maze
         
+        #### Determine which algoithm to use
+        if algorithm == "A*":
+            self.A_Star = True
+        elif algorithm == "Dijkstra's":
+            self.A_Star = False
+        else:
+            print("Not a valid search algorithm: A* or Dijkstra's")
+
         self.rows = len(maze)
         self.cols = len(maze[0])
 
-        #### Start state: (0,0) or top left        
+        #### Initial start state:       
         self.agent_pos = startLocation
         
-        #### Goal state:  (rows-1, cols-1) or bottom right
-        self.goal_pos = deliveryLocation
+        #### Goal states: 
+        self.goal_pos = deliveryLocations
         
         self.cells = [[Cell(x, y, maze[x][y] == 1) for y in range(self.cols)] for x in range(self.rows)]
-        
-        #### Start state's initial values for f(n) = g(n) + h(n) 
-        self.cells[self.agent_pos[0]][self.agent_pos[1]].g = 0
-        self.cells[self.agent_pos[0]][self.agent_pos[1]].h = self.heuristic(self.agent_pos)
-        self.cells[self.agent_pos[0]][self.agent_pos[1]].f = self.heuristic(self.agent_pos)
 
         #### The maze cell size in pixels
         self.cell_size = 15
@@ -63,13 +90,17 @@ class MazeGame:
         self.draw_maze()
         
         #### Display the optimum path in the maze
-        self.find_path()
-
-
+        for goal_pos in deliveryLocations:
+            #### Start state's initial values for f(n) = g(n) + h(n) 
+            self.goal_pos = tuple(map(int, goal_pos.split(',')))
+            self.cells[self.agent_pos[0]][self.agent_pos[1]].g = 0
+            self.cells[self.agent_pos[0]][self.agent_pos[1]].h = self.heuristic(self.agent_pos, A_Star=self.A_Star)
+            self.cells[self.agent_pos[0]][self.agent_pos[1]].f = self.heuristic(self.agent_pos, A_Star=self.A_Star)
+            self.find_path()
+            self.agent_pos = self.goal_pos            
 
     ############################################################
-    #### This is for the GUI part. No need to modify this unless
-    #### GUI changes are needed.
+    #### Draw the maze
     ############################################################
     def draw_maze(self):
         for x in range(self.rows):
@@ -78,17 +109,17 @@ class MazeGame:
                 color = 'black' if priority == 1 else 'tomato' if priority == 2 else 'light goldenrod' if priority == 3 else 'PaleGreen' if priority == 4 else 'sky blue' if priority == 5 else 'medium purple' if priority == 6 else 'white'
                 self.canvas.create_rectangle(y * self.cell_size, x * self.cell_size, (y + 1) * self.cell_size, (x + 1) * self.cell_size, fill=color)
 
+    ############################################################
+    #### Determine heuristic
+    ############################################################
+    def heuristic(self, pos, A_Star=True):
+        if A_Star:
+            return (abs(pos[0] - self.goal_pos[0]) + abs(pos[1] - self.goal_pos[1]))
+        else:
+            return 0
 
     ############################################################
-    #### Manhattan distance
-    ############################################################
-    def heuristic(self, pos):
-        return (abs(pos[0] - self.goal_pos[0]) + abs(pos[1] - self.goal_pos[1]))
-
-
-
-    ############################################################
-    #### A* Algorithm
+    #### Path Algorithm
     ############################################################
     def find_path(self):
         open_set = PriorityQueue()
@@ -122,7 +153,7 @@ class MazeGame:
                         self.cells[new_pos[0]][new_pos[1]].g = new_g
                         
                         ### Update the heurstic h()
-                        self.cells[new_pos[0]][new_pos[1]].h = self.heuristic(new_pos)
+                        self.cells[new_pos[0]][new_pos[1]].h = self.heuristic(new_pos, A_Star=self.A_Star)
                         
                         ### Update the evaluation function for the cell n: f(n) = g(n) + h(n)
                         self.cells[new_pos[0]][new_pos[1]].f = new_g + self.cells[new_pos[0]][new_pos[1]].h
@@ -131,11 +162,8 @@ class MazeGame:
                         #### Add the new cell to the priority queue
                         open_set.put((self.cells[new_pos[0]][new_pos[1]].f, new_pos))
                         
-                        
-
     ############################################################
-    #### This is for the GUI part. No need to modify this unless
-    #### screen changes are needed.
+    #### Construct the found path
     ############################################################
     def reconstruct_path(self):
         current_cell = self.cells[self.goal_pos[0]][self.goal_pos[1]]
@@ -144,20 +172,22 @@ class MazeGame:
         while current_cell.parent:
             x, y = current_cell.x, current_cell.y
             self.canvas.create_rectangle(y * self.cell_size, x * self.cell_size, (y + 1) * self.cell_size, (x + 1) * self.cell_size, fill='green')
-            current_cell = current_cell.parent
+            holding_cell = current_cell.parent
+            current_cell.parent = None
+            current_cell = holding_cell
 
             # Redraw cell with updated g() and h() values
             self.canvas.create_rectangle(y * self.cell_size, x * self.cell_size, (y + 1) * self.cell_size, (x + 1) * self.cell_size, fill=f'gray{color}')
-            if idx % 198 > 99:
+
+            # Determine color for path gradient
+            if idx % 200 > 100:
                 color -= 2
             else:
                 color += 2 
             idx += 4
 
-
     ############################################################
-    #### This is for the GUI part. No need to modify this unless
-    #### screen changes are needed.
+    #### Moving mechanics
     ############################################################
     def move_agent(self, event):
     
@@ -190,8 +220,7 @@ class MazeGame:
                   
 
 ############################################################
-#### Modify the wall cells to experiment with different maze
-#### configurations.
+#### Initializa maze object
 ############################################################
 maze = [
     [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -245,16 +274,26 @@ maze = [
     [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0]
 ]
 
-############################################################
-#### The mainloop activates the GUI.
-############################################################
-root = tk.Tk()
-root.title("A* Maze")
 
-game = MazeGame(root, maze, (1,6), (43,54))
-root.bind("<KeyPress>", game.move_agent)
 
-root.mainloop()
+############################################################
+#### Main
+############################################################
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("Maze")
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filename', type=str)
+    args = parser.parse_args()
+
+    # Parse the input file
+    algorithm, startLocation, deliveryLocations = parse_input_file(args.filename)
+
+    game = MazeGame(root, maze, algorithm, tuple(map(int, startLocation.split(','))), deliveryLocations) #top left to bottom right (1,6), (47,56)
+    root.bind("<KeyPress>", game.move_agent)
+
+    root.mainloop()
 
 
 
