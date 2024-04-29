@@ -60,8 +60,8 @@ maze = np.array([
 #print(goals)
 #print(goals2)
 
-#Define priority_queue function to put all of the goals in the queue
-def priority_queue(maze,deliveryLocations):
+#Define create_goal_queue function to put all of the goals in the queue
+def create_goal_queue(maze,deliveryLocations):
     queue = PriorityQueue()
     #Assigns priority based on ward number and adds location to queue
     for i in range(len(deliveryLocations)):
@@ -93,8 +93,8 @@ def check_ward(maze, startLocation, deliveryQueue):
 
 #Testing cases
 
-#Calls priority_queue function
-#queue1 = priority_queue(maze, goals)
+#Calls create_goal_queue function
+#queue1 = create_goal_queue(maze, goals)
 #Prints the queue for testing purposes
 #queue1.queue[2] = (0, 12)
 #temp = queue1.get()
@@ -102,7 +102,7 @@ def check_ward(maze, startLocation, deliveryQueue):
 #while not queue1.empty():
     #print(queue1.get())
 
-#queue2 = priority_queue(maze, goals)
+#queue2 = create_goal_queue(maze, goals)
 #start = (1,8)
 #queue2.queue[0] = (2,(45,51))
 #print(queue2.queue)
