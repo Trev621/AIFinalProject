@@ -54,24 +54,27 @@ maze = np.array([
 [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0]])
 
 #Initialize start and goals for testing purposes
-start = 15,15
-goals = np.array([maze[7][10], maze[46][14], maze[46][7], maze[15][53]])
-print(goals)
+#start = 15,15
+#goals = ((7,10), (46,14), (46,7), (15,53))
+#goals2 = np.array([maze[7][10], maze[46][14], maze[46][7], maze[15][53]])
+#print(goals)
+#print(goals2)
 
-#Define priority_queue function to put all of the goals in the queue (currently hard coded to 3, needs to be changed)
-def priority_queue(deliveryLocations):
+#Define priority_queue function to put all of the goals in the queue
+def priority_queue(maze,deliveryLocations):
     queue = PriorityQueue()
-    #Assigns priority based on ward number
-    for i in np.ndindex(deliveryLocations.shape):
-        if (deliveryLocations[i]==4 or deliveryLocations[i]==7 or deliveryLocations[i]==8 or deliveryLocations[i]==11):
+    #Assigns priority based on ward number and adds location to queue
+    for i in range(len(deliveryLocations)):
+        if (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==4 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==7 
+            or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==8 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==11):
             queue.put((1,deliveryLocations[i]))
-        elif (deliveryLocations[i]==5 or deliveryLocations[i]==6):
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==5 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==6):
             queue.put((2,deliveryLocations[i]))
-        elif (deliveryLocations[i]==10 or deliveryLocations[i]==12):
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==10 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==12):
             queue.put((3,deliveryLocations[i]))
-        elif (deliveryLocations[i]==3 or deliveryLocations[i]==13):
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==3 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==13):
             queue.put((4,deliveryLocations[i]))
-        elif (deliveryLocations[i]==2 or deliveryLocations[i]==9):
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]] or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]):
             queue.put((5,deliveryLocations[i]))
     return queue
 
@@ -79,8 +82,8 @@ def priority_queue(deliveryLocations):
 #Function that checks if current location is the same as any locations in the queue and moves any it finds to the front of the queue
 def check_ward(maze, startLocation, deliveryQueue):
     for i in range(0, deliveryQueue.qsize()):
-        #If start location is same as ith location in queue
-        if (deliveryQueue.queue[i][1] == maze[startLocation[0]][startLocation[1]]):
+        #If start ward is same as ith ward in queue
+        if (maze[deliveryQueue.queue[i][1][0]][deliveryQueue.queue[i][1][1]] == maze[startLocation[0]][startLocation[1]]):
             #Give it highest priority
             deliveryQueue.queue[i] = (0, deliveryQueue.queue[i][1])
             #This reorginizes the queue so it's in the correct order
@@ -91,7 +94,7 @@ def check_ward(maze, startLocation, deliveryQueue):
 #Testing cases
 
 #Calls priority_queue function
-#queue1 = priority_queue(goals)
+#queue1 = priority_queue(maze, goals)
 #Prints the queue for testing purposes
 #queue1.queue[2] = (0, 12)
 #temp = queue1.get()
@@ -99,11 +102,13 @@ def check_ward(maze, startLocation, deliveryQueue):
 #while not queue1.empty():
     #print(queue1.get())
 
-#queue2 = priority_queue(goals)
+#queue2 = priority_queue(maze, goals)
 #start = (1,8)
-#queue2.queue[0] = (2,6)
+#queue2.queue[0] = (2,(45,51))
 #print(queue2.queue)
 
+
+#print(queue2.queue[2][1][1])
 #check_ward(maze,start,queue2)
 #while not queue2.empty():
     #print(queue2.get())
