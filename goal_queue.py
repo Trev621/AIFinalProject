@@ -54,9 +54,9 @@ maze = np.array([
 [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0]])
 
 #Initialize start and goals for testing purposes
-#start = 15,15
-#goals = ((7,10), (46,14), (46,7), (15,53))
-#goals2 = np.array([maze[7][10], maze[46][14], maze[46][7], maze[15][53]])
+start = 15,15
+goals = ((7,10), (46,14), (46,7), (15,53), (46,12))
+goals2 = np.array([maze[7][10], maze[46][14], maze[46][7], maze[15][53]])
 #print(goals)
 #print(goals2)
 
@@ -102,16 +102,19 @@ def check_ward(maze, startLocation, deliveryQueue):
 #while not queue1.empty():
     #print(queue1.get())
 
-#queue2 = create_goal_queue(maze, goals)
-#start = (1,8)
-#queue2.queue[0] = (2,(45,51))
-#print(queue2.queue)
+queue2 = create_goal_queue(maze, goals)
+start = (47,14)
+queue2.queue[0] = (2,(45,51))
+print(queue2.queue)
 
+print("start ward: " + str(maze[start[0],start[1]]))
+print("location wards: ")
+for i in (range(goals.__len__())):
+    print(maze[queue2.queue[i][1][0],queue2.queue[i][1][1]])
 
-#print(queue2.queue[2][1][1])
-#check_ward(maze,start,queue2)
-#while not queue2.empty():
-    #print(queue2.get())
+check_ward(maze,start,queue2)
+while not queue2.empty():
+    print(queue2.get())
 
 
 
