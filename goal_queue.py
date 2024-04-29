@@ -86,9 +86,12 @@ def check_ward(maze, startLocation, deliveryQueue):
         if (maze[deliveryQueue.queue[i][1][0]][deliveryQueue.queue[i][1][1]] == maze[startLocation[0]][startLocation[1]]):
             #Give it highest priority
             deliveryQueue.queue[i] = (0, deliveryQueue.queue[i][1])
-            #This reorginizes the queue so it's in the correct order
-            temp = deliveryQueue.get()
-            deliveryQueue.put(temp)
+    #This reorginizes the queue so it's in the correct order
+    temp = deliveryQueue.get()
+    deliveryQueue.put(temp)
+    temp = deliveryQueue.get()
+    deliveryQueue.put(temp)
+    
 
 
 #Testing cases
