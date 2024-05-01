@@ -1,3 +1,0 @@
-Delivery algorithm: Dijkstra's
-Start location: 1,6
-Delivery locations: 47,56 13,59 46,20 11,1 2,3

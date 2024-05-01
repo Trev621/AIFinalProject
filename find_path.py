@@ -71,6 +71,47 @@ def checkDeliveryLocations(deliveryLocations):
 
 
 ######################################################
+#### Create ordered queue
+######################################################
+#Define create_goal_queue function to put all of the goals in the queue
+def create_goal_queue(maze,deliveryLocations):
+    queue = PriorityQueue()
+    #Assigns priority based on ward number and adds location to queue
+    for i in range(len(deliveryLocations)):
+        if (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==4 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==7 
+            or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==8 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==11):
+            queue.put((1,deliveryLocations[i]))
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==5 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==6):
+            queue.put((2,deliveryLocations[i]))
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==10 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==12):
+            queue.put((3,deliveryLocations[i]))
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==3 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==13):
+            queue.put((4,deliveryLocations[i]))
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==2 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==9):
+            queue.put((5,deliveryLocations[i]))
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==1):
+            print("Location", deliveryLocations[i], "is inside a wall.")
+        else:
+            print("Location", deliveryLocations[i], "is not inside a ward.")
+    return queue
+
+
+#Function that checks if current location is the same as any locations in the queue and moves any it finds to the front of the queue
+def check_ward(maze, startLocation, deliveryQueue):
+    for i in range(0, deliveryQueue.qsize()):
+        #If start ward is same as ith ward in queue
+        if (maze[deliveryQueue.queue[i][1][0]][deliveryQueue.queue[i][1][1]] == maze[startLocation[0]][startLocation[1]]):
+            #Give it highest priority
+            deliveryQueue.queue[i] = (0, deliveryQueue.queue[i][1])
+    #This reorginizes the queue so it's in the correct order
+    temp = deliveryQueue.get()
+    deliveryQueue.put(temp)
+    temp = deliveryQueue.get()
+    deliveryQueue.put(temp)
+
+
+
+######################################################
 #### Cell class
 ######################################################
 class Cell:
@@ -113,7 +154,7 @@ class MazeGame:
         self.agent_pos = startLocation
         
         #### Goal states: 
-        self.goal_pos = deliveryLocations
+        self.deliveryLocations = deliveryLocations
 
         #### List of successfully reached locations
         self.location_list = [startLocation]
@@ -216,10 +257,9 @@ class MazeGame:
         color = 20
         while current_cell.parent:
             x, y = current_cell.x, current_cell.y
-            self.canvas.create_rectangle(y * self.cell_size, x * self.cell_size, (y + 1) * self.cell_size, (x + 1) * self.cell_size, fill='green')
             current_cell = current_cell.parent
 
-            # Redraw cell with updated g() and h() values
+            # Draw path
             self.canvas.create_rectangle(y * self.cell_size, x * self.cell_size, (y + 1) * self.cell_size, (x + 1) * self.cell_size, fill=f'gray{color}')
 
             # Determine color for path gradient
@@ -228,6 +268,13 @@ class MazeGame:
             else:
                 color += 2 
             idx += 4
+
+        # Highlight goals
+        for location in self.deliveryLocations:
+            self.canvas.create_rectangle(location[1] * self.cell_size, location[0] * self.cell_size, (location[1] + 1) * self.cell_size, (location[0] + 1) * self.cell_size, fill=f'brown4')
+        for location in self.location_list:
+            self.canvas.create_rectangle(location[1] * self.cell_size, location[0] * self.cell_size, (location[1] + 1) * self.cell_size, (location[0] + 1) * self.cell_size, fill=f'blue')
+        self.canvas.create_rectangle(self.location_list[0][1] * self.cell_size, self.location_list[0][0] * self.cell_size, (self.location_list[0][1] + 1) * self.cell_size, (self.location_list[0][0] + 1) * self.cell_size, fill=f'green4')
 
     ############################################################
     #### Print results
@@ -340,29 +387,35 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Parse the input file
-    algorithm, startLocation, deliveryLocations = parse_input_file(args.filename)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('filename', type=str)
-    args = parser.parse_args()
-
-    # Parse the input file
     result = parse_input_file(args.filename)
 
     # Check if the returned result is a tuple of three elements
     if isinstance(result, tuple) and len(result) == 3:
         algorithm, startLocation, deliveryLocations = result
+        print("")
+        print("============================================================")
         print("Algorithm:", algorithm)
         print("Start Location:", startLocation)
         print("Delivery Locations:", deliveryLocations)
+        print("------------------------------------------------------------")
+
+        # Organize the queue
+        deliveryQueue = create_goal_queue(maze, deliveryLocations)
+        check_ward(maze, startLocation, deliveryQueue)
+        deliveryLocations = []
+        while not deliveryQueue.empty():
+            deliveryLocations.append(deliveryQueue.get()[1])
+        print("Reordered Queue:", deliveryLocations)
+        print("------------------------------------------------------------")
+
+        # Run the algorithm
         game = MazeGame(root, maze, algorithm, startLocation, deliveryLocations) #top left to bottom right (1,6), (47,56)
+        print("============================================================")
+        print("")
+        root.bind("<KeyPress>", game.move_agent)
+        root.mainloop()
     else:
         # Handle error or unexpected return values
+        print("---------------------------------------------------")
         print(result)
-
-    root.bind("<KeyPress>", game.move_agent)
-
-    root.mainloop()
-
-
-
+        print("---------------------------------------------------")

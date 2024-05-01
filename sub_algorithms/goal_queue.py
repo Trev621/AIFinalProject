@@ -54,9 +54,9 @@ maze = np.array([
 [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0]])
 
 #Initialize start and goals for testing purposes
-start = 15,15
-goals = ((7,10), (46,14), (46,7), (15,53), (46,12))
-goals2 = np.array([maze[7][10], maze[46][14], maze[46][7], maze[15][53]])
+#start = 15,15
+goals = ((47, 56), (13, 59), (26, 21), (1, 18), (46, 20), (11, 50), (7, 27))
+#goals2 = np.array([maze[7][10], maze[46][14], maze[46][7], maze[15][53]])
 #print(goals)
 #print(goals2)
 
@@ -74,8 +74,12 @@ def create_goal_queue(maze,deliveryLocations):
             queue.put((3,deliveryLocations[i]))
         elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==3 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==13):
             queue.put((4,deliveryLocations[i]))
-        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]] or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]):
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==2 or maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==9):
             queue.put((5,deliveryLocations[i]))
+        elif (maze[deliveryLocations[i][0]][deliveryLocations[i][1]]==1):
+            print("Location", deliveryLocations[i], "is inside a wall.")
+        else:
+            print("Location", deliveryLocations[i], "is not inside a ward.")
     return queue
 
 
@@ -106,8 +110,8 @@ def check_ward(maze, startLocation, deliveryQueue):
     #print(queue1.get())
 
 queue2 = create_goal_queue(maze, goals)
-start = (47,14)
-queue2.queue[0] = (2,(45,51))
+start = (46,16)
+#queue2.queue[0] = (2,(45,51))
 print(queue2.queue)
 
 print("start ward: " + str(maze[start[0],start[1]]))
