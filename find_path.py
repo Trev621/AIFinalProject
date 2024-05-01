@@ -390,7 +390,7 @@ if __name__ == "__main__":
     result = parse_input_file(args.filename)
 
     # Check if the returned result is a tuple of three elements
-    if isinstance(result, tuple) and len(result) == 3:
+    if isinstance(result, tuple) and len(result) == 3 and maze[result[1][0]][result[1][1]] != 1:
         algorithm, startLocation, deliveryLocations = result
         print("")
         print("============================================================")
@@ -414,8 +414,15 @@ if __name__ == "__main__":
         print("")
         root.bind("<KeyPress>", game.move_agent)
         root.mainloop()
+
+    # Check for if starting value is a wall
+    elif isinstance(result, tuple) and len(result) == 3 and maze[result[1][0]][result[1][1]] == 1:
+        print("---------------------------------------------------")
+        print("Starting location cannot be a wall")
+        print("---------------------------------------------------")
+        
+    # Handle error or unexpected return values
     else:
-        # Handle error or unexpected return values
         print("---------------------------------------------------")
         print(result)
         print("---------------------------------------------------")
