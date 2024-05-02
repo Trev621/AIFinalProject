@@ -91,10 +91,14 @@ def check_ward(maze, startLocation, deliveryQueue):
             #Give it highest priority
             deliveryQueue.queue[i] = (0, deliveryQueue.queue[i][1])
     #This reorginizes the queue so it's in the correct order
-    temp = deliveryQueue.get()
-    deliveryQueue.put(temp)
-    temp = deliveryQueue.get()
-    deliveryQueue.put(temp)
+    size = deliveryQueue.qsize()
+    tempQueue = PriorityQueue()
+    #Put the contents of deliveryQueue into tempQueue and then puts them back
+    for i in range(0, size):
+        tempQueue.put(deliveryQueue.get())
+    for i in range(0, size):
+        deliveryQueue.put(tempQueue.get())
+    
     
 
 
