@@ -202,7 +202,7 @@ class MazeGame:
         for x in range(self.rows):
             for y in range(self.cols):
                 ward = self.maze[x][y]
-                color = 'black' if ward == 1 else 'tomato' if ward == 9 else 'tomato' if ward == 2 else 'light goldenrod' if ward == 3 else 'light goldenrod' if ward == 13 else 'pale green' if ward == 12 else 'pale green' if ward == 10 else 'sky blue' if ward == 5 else 'sky blue' if ward == 6 else 'medium purple' if ward == 11 else 'medium purple' if ward == 4 else 'medium purple' if ward == 8 else 'medium purple' if ward == 7 else 'white'
+                color = 'black' if ward == 1 else 'gray' if ward == 2 else 'tomato' if ward == 3 else 'light goldenrod' if ward == 4 else 'sky blue' if ward == 5 else 'pink' if ward == 6 else 'forest green' if ward == 7 else 'orange' if ward == 8 else 'teal' if ward == 9 else 'light green' if ward == 10 else 'violet' if ward == 11 else 'coral' if ward == 12 else 'lime' if ward == 13 else 'white'
                 self.canvas.create_rectangle(y * self.cell_size, x * self.cell_size, (y + 1) * self.cell_size, (x + 1) * self.cell_size, fill=color)
 
     # Marks delivery locations on the maze
