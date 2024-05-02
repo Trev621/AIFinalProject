@@ -104,10 +104,13 @@ def check_ward(maze, startLocation, deliveryQueue):
             #Give it highest priority
             deliveryQueue.queue[i] = (0, deliveryQueue.queue[i][1])
     #This reorginizes the queue so it's in the correct order
-    temp = deliveryQueue.get()
-    deliveryQueue.put(temp)
-    temp = deliveryQueue.get()
-    deliveryQueue.put(temp)
+    size = deliveryQueue.qsize()
+    tempQueue = PriorityQueue()
+    #Put the contents of deliveryQueue into tempQueue and then puts them back
+    for i in range(0, size):
+        tempQueue.put(deliveryQueue.get())
+    for i in range(0, size):
+        deliveryQueue.put(tempQueue.get())    
 
 
 
@@ -170,6 +173,7 @@ class MazeGame:
         self.colorIndex = 1
 
         self.draw_maze()
+        self.mark_locations()
         self.process_next_goal()
 
     def process_next_goal(self):
@@ -200,6 +204,12 @@ class MazeGame:
                 ward = self.maze[x][y]
                 color = 'black' if ward == 1 else 'tomato' if ward == 9 else 'tomato' if ward == 2 else 'light goldenrod' if ward == 3 else 'light goldenrod' if ward == 13 else 'pale green' if ward == 12 else 'pale green' if ward == 10 else 'sky blue' if ward == 5 else 'sky blue' if ward == 6 else 'medium purple' if ward == 11 else 'medium purple' if ward == 4 else 'medium purple' if ward == 8 else 'medium purple' if ward == 7 else 'white'
                 self.canvas.create_rectangle(y * self.cell_size, x * self.cell_size, (y + 1) * self.cell_size, (x + 1) * self.cell_size, fill=color)
+
+    # Marks delivery locations on the maze
+    def mark_locations(self):
+        self.canvas.create_rectangle(self.location_list[0][1] * self.cell_size, self.location_list[0][0] * self.cell_size, (self.location_list[0][1] + 1) * self.cell_size, (self.location_list[0][0] + 1) * self.cell_size, fill=f'green4')
+        for location in self.deliveryLocations:
+            self.canvas.create_rectangle(location[1] * self.cell_size, location[0] * self.cell_size, (location[1] + 1) * self.cell_size, (location[0] + 1) * self.cell_size, fill=f'brown4')
 
     ############################################################
     #### Determine heuristic
@@ -275,16 +285,16 @@ class MazeGame:
             parent_cell = self.cells[current_pos[0]][current_pos[1]].parent
             current_pos = (parent_cell.x, parent_cell.y)
         path.reverse()
+        self.update_locations()
         self.draw_path(path, 0)
 
-        #Marks delivery locations on the maze
-        for location in self.deliveryLocations:
-            self.canvas.create_rectangle(location[1] * self.cell_size, location[0] * self.cell_size, (location[1] + 1) * self.cell_size, (location[0] + 1) * self.cell_size, fill=f'brown4')
-        for location in self.location_list:
-            self.canvas.create_rectangle(location[1] * self.cell_size, location[0] * self.cell_size, (location[1] + 1) * self.cell_size, (location[0] + 1) * self.cell_size, fill=f'blue')
-        self.canvas.create_rectangle(self.location_list[0][1] * self.cell_size, self.location_list[0][0] * self.cell_size, (self.location_list[0][1] + 1) * self.cell_size, (self.location_list[0][0] + 1) * self.cell_size, fill=f'green4')
-    
-    #Draws the path, each step takes 100ms
+    #Marks delivery locations on the maze
+    def update_locations(self):
+        #for location in self.location_list:
+        #    self.canvas.create_rectangle(location[1] * self.cell_size, location[0] * self.cell_size, (location[1] + 1) * self.cell_size, (location[0] + 1) * self.cell_size, fill=f'blue')
+        self.canvas.create_rectangle(self.location_list[-1][1] * self.cell_size, self.location_list[-1][0] * self.cell_size, (self.location_list[-1][1] + 1) * self.cell_size, (self.location_list[-1][0] + 1) * self.cell_size, fill=f'blue')
+
+    #Draws the path, each step takes 50ms
     def draw_path(self, path, index):
         if index < len(path):
             x, y = path[index]
@@ -294,7 +304,8 @@ class MazeGame:
         else:
             #When path is fully drawn, update agent_pos and process the next goal
             self.agent_pos = path[-1]
-            self.root.after(100, self.process_next_goal)
+            self.update_locations()
+            self.root.after(50, self.process_next_goal)
 
     def update_color(self):
         if self.colorIndex % 200 > 100:
@@ -419,7 +430,7 @@ if __name__ == "__main__":
     result = parse_input_file(args.filename)
 
     # Check if the returned result is a tuple of three elements
-    if isinstance(result, tuple) and len(result) == 3 and maze[result[1][0]][result[1][1]] != 1:
+    if isinstance(result, tuple) and len(result) == 3 and maze[result[1][0]][result[1][1]] != 1 and result[2].count(result[1]) == 0:
         algorithm, startLocation, deliveryLocations = result
         print("")
         print("============================================================")
@@ -446,6 +457,12 @@ if __name__ == "__main__":
     elif isinstance(result, tuple) and len(result) == 3 and maze[result[1][0]][result[1][1]] == 1:
         print("---------------------------------------------------")
         print("Starting location cannot be a wall")
+        print("---------------------------------------------------")
+
+    # Check for if starting value is the same as a goal
+    elif isinstance(result, tuple) and len(result) == 3 and result[2].count(result[1]) != 0:
+        print("---------------------------------------------------")
+        print("Starting location cannot be a goal")
         print("---------------------------------------------------")
         
     # Handle error or unexpected return values
