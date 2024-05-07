@@ -290,8 +290,6 @@ class MazeGame:
 
     #Marks delivery locations on the maze
     def update_locations(self):
-        #for location in self.location_list:
-        #    self.canvas.create_rectangle(location[1] * self.cell_size, location[0] * self.cell_size, (location[1] + 1) * self.cell_size, (location[0] + 1) * self.cell_size, fill=f'blue')
         self.canvas.create_rectangle(self.location_list[-1][1] * self.cell_size, self.location_list[-1][0] * self.cell_size, (self.location_list[-1][1] + 1) * self.cell_size, (self.location_list[-1][0] + 1) * self.cell_size, fill=f'blue')
 
     #Draws the path, each step takes 50ms
