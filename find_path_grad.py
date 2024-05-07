@@ -1,7 +1,8 @@
 #######################################################
-#### Final Project
-#### Joe Popp, Trevor, Deston
+#### Joe Popp, Trevor Lacoste, Deston Willis
 #### AI, Spring 2024
+#### 5/7/2024
+#### Final project, the purpose of this assignment is to use implement a find finding algorithm using A* and Dijkstra to deliver medication to different hospital wards
 #######################################################
 import tkinter as tk
 from PIL import ImageTk, Image, ImageOps 
